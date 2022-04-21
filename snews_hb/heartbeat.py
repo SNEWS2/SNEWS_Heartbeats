@@ -8,16 +8,12 @@ import os, json, click
 import pandas as pd
 from hop import Stream
 from datetime import datetime
+import numpy as np
 import dateutil.parser
 from . import hb_utils
 
 class HeartBeat:
     """ Class to handle heartbeat message stream
-        Parameters
-        ----------
-        env_path : `str`
-            path for the environment file.
-            Use default settings if not given
 
         """
     def __init__(self):
@@ -26,6 +22,7 @@ class HeartBeat:
         self.times = hb_utils.TimeStuff()
         self.hr = self.times.get_hour()
         self.date = self.times.get_date()
+        self.stash_time = 24 # hours
         self.column_names = ["Received Times", "Detector", "Stamped Times", "Latency", "Time After Last"]
         self.cache_df = pd.DataFrame(columns=self.column_names)
         self.cache_df.set_index("Received Times", inplace=True)
@@ -38,7 +35,7 @@ class HeartBeat:
         msg["Stamped Times"] = stamped_time_obj
         msg["Latency"] = msg["Received Times"] - msg["Stamped Times"]
         # check the last message of given detector
-        detector_df = self.cache_df[self.cache_df["Detector"]==msg['Detector']] # .query(f"Detector=={msg['Detector']}")
+        detector_df = self.cache_df[self.cache_df["Detector"]==msg['Detector']]
         if len(detector_df):
             msg["Time After Last"] = msg["Received Times"] - detector_df["Received Times"].max()
         else:
@@ -60,6 +57,33 @@ class HeartBeat:
         self.store_beats()
         raise NotImplementedError
 
+    def drop_old_messages(self):
+        """ Keep the heartbeats for 24 hours
+            Store (all?) statistics and remove earlier messages
+
+        """
+        curr_time = datetime.utcnow()
+        existing_times = self.cache_df["Received Times"]
+
+        del_t = (curr_time - existing_times).total_seconds() /60/60
+        locs = np.where(del_t >= self.stash_time)[0]
+        self.cache_df = self.cache_df[~locs]
+        # return True if del_t >= self.stash_time else False
+
+    def dump_csv(self):
+        """ dump a local csv file once a day
+            and keep appending the messages within that day
+            into the same csv file
+
+        """
+        today = datetime.utcnow()
+        today_str = datetime.strftime(today, "%y-%m-%d")
+        output_csv_name = f"./daily_logs/{today_str}_heartbeat_log.csv"
+        if os.path.exists(output_csv_name):
+            self.cache_df.to_csv(output_csv_name, mode='a', header=True)
+        else:
+            self.cache_df.to_csv(output_csv_name, mode='w', header=True)
+
     def subscribe(self):
         """ Subscribe and listen heartbeats
         """
@@ -77,7 +101,8 @@ class HeartBeat:
                     if message['_id'].split('_')[0] != 'Heartbeat':
                         message["Received Times"] = datetime.utcnow() #.strftime("%y/%m/%d %H:%M:%S:%f")
                         self.make_entry(message)
-                        # self.check_store()
+                        self.dump_csv()
+                        self.drop_old_messages()
 
                     else:
                         # handle only the heartbeat messages
