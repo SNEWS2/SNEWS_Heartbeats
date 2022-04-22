@@ -13,10 +13,15 @@ def main(ctx):
     ctx.obj['env'] = "env"
 
 @main.command()
-def run_heartbeat():
+@click.option('--output_folder', '-o', default='cwd', show_default='cwd', help='Output folder')
+@click.option('--store', '-s', default='both', show_default='both', help='either ["both", "csv", "json"]')
+def run_heartbeat(output_folder, store):
     """ Initiate Coincidence Decider
     """
-    hb = HeartBeat()
+    if output_folder == 'None':
+        output_folder = None
+
+    hb = HeartBeat(logs_folder=output_folder, store=store)
     try:
         hb.subscribe()
     except KeyboardInterrupt:
