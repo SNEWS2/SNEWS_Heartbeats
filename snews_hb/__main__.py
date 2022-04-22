@@ -18,7 +18,7 @@ def main(ctx):
 def run_heartbeat(output_folder, store):
     """ Initiate Coincidence Decider
     """
-    if output_folder == 'None':
+    if output_folder == 'cwd':
         output_folder = None
 
     hb = HeartBeat(logs_folder=output_folder, store=store)
