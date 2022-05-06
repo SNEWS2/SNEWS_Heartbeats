@@ -192,7 +192,7 @@ class HeartBeat:
                                     f"snews_pt convention. \nThis is not supported now", fg='red')
                         continue
 
-                    if message['_id'].split('_')[0] != 'Heartbeat':
+                    if message['_id'].split('_')[0] == 'Heartbeat':
                         message["Received Times"] = datetime.utcnow()
                         self.make_entry(message)
                         self.drop_old_messages()
