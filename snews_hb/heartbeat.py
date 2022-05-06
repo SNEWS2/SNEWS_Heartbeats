@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 import numpy as np
 from glob import glob
 from . import hb_utils
+from . import analyse_beats
 
 class HeartBeat:
     """ Class to handle heartbeat message stream
@@ -166,6 +167,17 @@ class HeartBeat:
     def display_table(self):
         print("Current cache \n", self.cache_df.to_markdown())
 
+    def sanity_checks(self):
+        """ Check  the following
+            - detector frequencies are reasonable
+            - latencies are reasonable
+            - At least one detector is operational
+
+        :return:
+        """
+        analyse_beats.Analyze(self.cache_df)
+        return None
+
     def subscribe(self):
         """ Subscribe and listen heartbeats
         """
@@ -184,6 +196,7 @@ class HeartBeat:
                         message["Received Times"] = datetime.utcnow()
                         self.make_entry(message)
                         self.drop_old_messages()
+                        self.sanity_checks()
                         self.display_table()
                         self.burn_logs()
 
