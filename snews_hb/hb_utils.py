@@ -3,6 +3,7 @@ Example initial dosctring
 """
 from dotenv import load_dotenv
 from datetime import datetime
+import configparser
 import os
 
 
@@ -67,3 +68,38 @@ def get_logger(scriptname, logfile_name):
     logger.addHandler(file_handler)
     return logger
 
+def get_config(conf_path=None):
+    if conf_path is None:
+        conf_path = "../heartbeats_config.conf"
+    config = configparser.ConfigParser()
+    config.read(conf_path)
+    return config
+
+#
+# def update_config(updates, _config):
+#     """ Update configuration file locally
+#         Takes and updates dictionary
+#         Searches for the configuration keys, and replaces
+#         them with the updated ones
+#     :return:
+#     """
+#
+#     config_string = io.StringIO()
+#     _config.write(config_string)
+#     # We must reset the buffer ready for reading.
+#     config_string.seek(0)
+#     new_config = configparser.ConfigParser()
+#     new_config.read_file(config_string)
+#
+#     if updates is None:
+#         return new_config
+#     config_dict = {s: dict(new_config.items(s)) for s in new_config.sections()}
+#     for section, section_dict in updates.items():
+#         if section not in config_dict.keys():
+#             raise KeyError(f"{section} is not a valid configuration section!")
+#         for key, value in section_dict.items():
+#             if key not in config_dict[section].keys():
+#                 raise KeyError(f"{key} is not a valid configuration key in {section}!")
+#             new_config[section][key] = value
+#     return new_config
+#

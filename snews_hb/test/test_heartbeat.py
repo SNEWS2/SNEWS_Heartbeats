@@ -2,15 +2,20 @@
 from snews_hb.heartbeat import HeartBeat
 from SNEWS_PT.snews_pub import SNEWSTiersPublisher
 
-import os, json
-
-def test_coincidence_expected():
+def test_heartbeat_message():
     """Test with example of expected message type."""
     # Create heartbeat tier message.
-    with open("example_heartbeat.json") as json_file:
-        data = json.load(json_file)
+    hb = SNEWSTiersPublisher.from_json("example_heartbeat.json")
+    assert hb.tiernames == ['Heartbeat'], f"Expected 'Heartbeat' Tier got {hb.tiernames[0]}"
+    input_hb = {"detector_name": "TEST", "machine_time":"30/01/01 12:34:48:678999", "detector_status":"ON"}
+    for k,v in input_hb.items():
+        assert hb.messages[0][k] == v
 
-    SNEWSTiersPublisher.from_json("example_heartbeat.json")
-    coin = HeartBeat(detector_name='KamLAND', neutrino_time='12/06/09 15:31:08:1098', p_value=0.4)
-    # Check that message has expected structure.
-    assert coin.tiernames == ['CoincidenceTier']
+    try:
+        hb.send_to_snews(firedrill_mode=False)
+    except Exception as exc:
+        print('SNEWSTiersPublisher.send_to_snews() test failed!\n')
+        assert False, f"Exception raised:\n {exc}"
+
+def test_heartbeat_server():
+    pass

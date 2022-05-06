@@ -1,8 +1,6 @@
-{   "_id":
-        "04_Heartbeat_time",
-    "detector_name":
-        "test machine name",
-    "sent_time":
+{   "detector_name":
+        "TEST",
+    "machine_time":
         "30/01/01 12:34:48:678999",
     "detector_status":
         "ON"

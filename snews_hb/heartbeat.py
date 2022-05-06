@@ -16,20 +16,21 @@ class HeartBeat:
     """ Class to handle heartbeat message stream
 
         """
-    def __init__(self, logs_folder=None, store='both'):
+    def __init__(self, logs_folder=None, store=None):
         """
 
         :param logs_folder: `str` where the logs will be saved (default is cwd)
         :param store: `str` one of ['csv','json','both'] what format to store
         """
         # maybe hard code this and get rid of the env file?
-        self.heartbeat_topic = "kafka://kafka.scimma.org/snews.experiments-test"
+        config = hb_utils.get_config()
+        self.store = config['param']['store'] if store is None else store
+        self.stash_time = config['param']['stash_time']
+        self.delete_after = config['param']['delete_after']
+        self.heartbeat_topic = config['topics']['heartbeat']
         self.times = hb_utils.TimeStuff()
         self.hr = self.times.get_hour()
         self.date = self.times.get_date()
-        self.stash_time = 24 # hours
-        self.delete_after = 7 # days
-        self.store = store
         self.column_names = ["Received Times", "Detector", "Stamped Times", "Latency", "Time After Last"]
         self.cache_df = pd.DataFrame(columns=self.column_names)
         if logs_folder is None:
@@ -70,7 +71,6 @@ class HeartBeat:
             self.dump_JSON()
         else:
             raise KeyError(f"Can store either 'csv', 'json' or both, got {self.store}")
-
 
     def drop_old_messages(self):
         """ Keep the heartbeats for 24 hours
