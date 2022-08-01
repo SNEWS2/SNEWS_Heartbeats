@@ -25,7 +25,6 @@ class HeartBeat:
         # maybe hard code this and get rid of the env file?
         config = hb_utils.get_config()
         self.store = config['params']['store'] if store is None else store
-        # self.stash_time = timedelta(hours=float(config['params']['stash_time']))
         self.stash_time = float(config['params']['stash_time']) # hours
         self.delete_after = float(config['params']['delete_after']) # days
         self.heartbeat_topic = config['topics']['heartbeat']
@@ -193,6 +192,9 @@ class HeartBeat:
                                     f"snews_pt convention. \nThis is not supported now", fg='red')
                         continue
 
+                    if len(message['_id'].split('_')) < 2:
+                        print(f"> Received an unknown id {message['_id']}\n\t Ignoring...")
+                        pass
                     if message['_id'].split('_')[1] == 'Heartbeat':
                         message["Received Times"] = datetime.utcnow()
                         print(message)
