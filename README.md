@@ -8,7 +8,7 @@ after installation <br>
 
 run CLI to start the heartbeat server <br>
 
-`snews_hb run-hearbeat` <br>
+`snews_hb run-heartbeat` <br>
 
 You can specify the logs folder via `-o` flag, and what to store via `-s` you have three options
 `['csv','json','both']` default is both. 

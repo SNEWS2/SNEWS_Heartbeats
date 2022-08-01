@@ -9,7 +9,6 @@ import pandas as pd
 from hop import Stream
 from datetime import datetime, timedelta
 import numpy as np
-from glob import glob
 from . import hb_utils
 from . import analyse_beats
 
@@ -25,9 +24,9 @@ class HeartBeat:
         """
         # maybe hard code this and get rid of the env file?
         config = hb_utils.get_config()
-        self.store = config['param']['store'] if store is None else store
-        self.stash_time = config['param']['stash_time']
-        self.delete_after = config['param']['delete_after']
+        self.store = config['params']['store'] if store is None else store
+        self.stash_time = config['params']['stash_time']
+        self.delete_after = config['params']['delete_after']
         self.heartbeat_topic = config['topics']['heartbeat']
         self.times = hb_utils.TimeStuff()
         self.hr = self.times.get_hour()

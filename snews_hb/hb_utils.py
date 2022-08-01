@@ -24,10 +24,9 @@ def set_env(env_path=None):
 
 
 class TimeStuff:
-    ''' SNEWS format datetime objects
+    """ SNEWS format datetime objects
 
-    '''
-
+    """
     def __init__(self, env_path=None):
         set_env(env_path)
         self.snews_t_format = os.getenv("TIME_STRING_FORMAT")
@@ -47,30 +46,10 @@ class TimeStuff:
         return datetime.strptime(nu_time, fmt)
 
 
-# TODO: needs work
-def get_logger(scriptname, logfile_name):
-    """ Logger
-
-    .. note:: Deprecated
-
-    """
-    import logging
-    # Gets or creates a logger
-    logger = logging.getLogger(scriptname)
-
-    # set log level
-    logger.setLevel(logging.INFO)
-    # define file handler and set formatter
-    file_handler = logging.FileHandler(logfile_name)
-    formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(message)s')
-    file_handler.setFormatter(formatter)
-    # add file handler to logger
-    logger.addHandler(file_handler)
-    return logger
-
 def get_config(conf_path=None):
+    dirname = os.path.dirname(__file__)
     if conf_path is None:
-        conf_path = "../heartbeats_config.conf"
+        conf_path = os.path.join(dirname, "../heartbeats_config.conf")
     config = configparser.ConfigParser()
     config.read(conf_path)
     return config
