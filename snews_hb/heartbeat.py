@@ -25,8 +25,9 @@ class HeartBeat:
         # maybe hard code this and get rid of the env file?
         config = hb_utils.get_config()
         self.store = config['params']['store'] if store is None else store
-        self.stash_time = config['params']['stash_time']
-        self.delete_after = config['params']['delete_after']
+        # self.stash_time = timedelta(hours=float(config['params']['stash_time']))
+        self.stash_time = float(config['params']['stash_time']) # hours
+        self.delete_after = float(config['params']['delete_after']) # days
         self.heartbeat_topic = config['topics']['heartbeat']
         self.times = hb_utils.TimeStuff()
         self.hr = self.times.get_hour()
@@ -44,7 +45,7 @@ class HeartBeat:
         """ Make an entry in the cache df using new message
         """
         msg = {"Received Times": message["Received Times"], "Detector": message["detector_name"]}
-        stamped_time_obj = self.times.str_to_datetime(message["sent_time"], fmt="%y/%m/%d %H:%M:%S")
+        stamped_time_obj = self.times.str_to_datetime(message["sent_time"], fmt="%y/%m/%d %H:%M:%S:%f")
         msg["Stamped Times"] = stamped_time_obj
         msg["Latency"] = msg["Received Times"] - msg["Stamped Times"]
         # check the last message of given detector
@@ -186,13 +187,15 @@ class HeartBeat:
             with stream.open(self.heartbeat_topic, "r") as s:
                 print("wait please")
                 for message in s:
+                    print(message)
                     if '_id' not in message.keys():
                         click.secho(f"Attempted to submit a message that does not follow "
                                     f"snews_pt convention. \nThis is not supported now", fg='red')
                         continue
 
-                    if message['_id'].split('_')[0] == 'Heartbeat':
+                    if message['_id'].split('_')[1] == 'Heartbeat':
                         message["Received Times"] = datetime.utcnow()
+                        print(message)
                         self.make_entry(message)
                         self.drop_old_messages()
                         self.sanity_checks()
